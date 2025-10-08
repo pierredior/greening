@@ -1,44 +1,38 @@
-name: Auto commit Scheduled
-
+name: Auto Commit Scheduled
 on:
   schedule:
-    
+    # Berjalan setiap jam, pada menit ke-0
     - cron: "0 * * * *"
   
+  # Pemicu manual untuk testing
   workflow_dispatch:
 
 jobs:
   auto_commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-          fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      
       - name: Modify LAST_UPDATED file
         run: |
-          # Perintah ini akan membuat/mengubah file LAST_UPDATED dengan tanggal saat ini
-          echo "Last updated on $(date)" > LAST_UPDATED
+          # Membuat perubahan unik agar selalu ada yang bisa di-commit
+          echo "Last scheduled update on $(date)" > LAST_UPDATED
 
-      
       - name: Commit and Push changes
         run: |
           git config --local user.email "maarzsyena@gmail.com"
           git config --local user.name "andidelouise"
-          git add -A
-          
-          # Cek apakah ada perubahan, jika ada baru commit
+          git add LAST_UPDATED
+          # Commit hanya jika ada perubahan
           if ! git diff --staged --quiet; then
-            git commit -m "chore: auto update activity"
+            git commit -m "chore(bot): auto update activity"
           else
             echo "No changes to commit."
           fi
 
       - name: Push changes
-        uses: ad-m/github-push-action@v0.6.0
+        uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main 
-          force: true
