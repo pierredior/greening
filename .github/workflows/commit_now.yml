@@ -1,72 +1,45 @@
-name: Commit Now
-
+name: Commit Now Manual
 on:
   workflow_dispatch:
     inputs:
-      email:
-        description: 'EMail'
-        required: true
-        default: 'maarzsyena@gmail.com'
-      username:
-        description: 'Username'
-        required: true
-        default: 'andidelouise'
-      commit:
-        description: 'Commit'
-        required: true
-        default: 'greening'
       limit:
-        description: 'Limit Commit'
+        description: 'Jumlah commit yang ingin dibuat'
         required: true
-        default: 10
-  push:
-    branches:
-      - main
+        default: '20'
+      commit_message:
+        description: 'Pesan commit'
+        required: true
+        default: 'feat: add greening activity'
 
 jobs:
-  auto_commit:
+  manual_commit_job:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2      
-        with:
-         persist-credentials: false
-         fetch-depth: 0
-      
-      - name: Set Config
-        run: |
-          git config --local user.email "${{ github.event.inputs.email }}"
-          git config --local user.name "${{ github.event.inputs.username }}"
-          git add -A
-          
-          arr[0]="chore(bot): 😂 auto commit"
-          arr[1]="chore(bot): 😱 auto commit"
-          arr[2]="chore(bot): 👿 auto commit"
-          arr[3]="chore(bot): 💩 auto commit"
-          arr[4]="chore(bot): 🙏 auto commit"
-          arr[5]="chore(bot): 🙈 auto commit"
-          arr[6]="chore(bot): 🐐 auto commit"
-          arr[7]="chore(bot): 🤖 auto commit"
-          arr[8]="chore(bot): 🟩 auto commit"
-          arr[9]="chore(bot): 👻 auto commit"
-          
-          rand=$[$RANDOM % ${#arr[@]}]
-          
-          git commit -m "${arr[$rand]}"
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: DO It
+      - name: Generate and Commit Changes
         run: |
-          for i in {0..${{ github.event.inputs.limit }}}
-          do
-            cat > LAST_UPDATED
-            d=$i+`date '+%Y-%m-%dT%H:%M:%SZ'`
-            echo $d > LAST_UPDATED
-            git add -A
-            git commit -m "${{ github.event.inputs.commit }}"
-          done
+          # Konfigurasi user
+          git config --local user.email "maarzsyena@gmail.com"
+          git config --local user.name "andidelouise"
           
-      - name: GitHub Push
-        uses: ad-m/github-push-action@v0.6.0
+          # Ambil jumlah limit dari input
+          limit=${{ github.event.inputs.limit }}
+          echo "Akan membuat ${limit} commit..."
+          
+          # Perulangan (loop) yang sudah diperbaiki
+          for (( i=1; i<=${limit}; i++ ))
+          do
+            # Membuat konten unik untuk setiap commit
+            echo "Manual commit ke-$i pada $(date)" > LAST_UPDATED_MANUAL
+            git add LAST_UPDATED_MANUAL
+            # Melakukan commit dengan pesan dari input
+            git commit -m "${{ github.event.inputs.commit_message }} (#$i)"
+          done
+
+      - name: Push changes to GitHub
+        uses: ad-m/github-push-action@master
         with:
-          force: true
-          directory: "."
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main 
