@@ -14,14 +14,14 @@ on:
       commit:
         description: 'Commit'
         required: true
-        default: 'Penghijauan'
+        default: 'greening'
       limit:
         description: 'Limit Commit'
         required: true
         default: 10
   push:
     branches:
-      - master
+      - main
 
 jobs:
   auto_commit:
